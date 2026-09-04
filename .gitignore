@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+firewall.db
+.venv/
+.env
+firewall.db-shm
+firewall.db-wal

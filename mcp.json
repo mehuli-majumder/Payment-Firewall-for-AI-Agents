@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "payment-firewall": {
+      "command": "python",
+      "args": ["mcp_server.py"],
+      "env": {
+        "FIREWALL_URL": "http://127.0.0.1:8000",
+        "FIREWALL_AGENT_ID": "ops-agent",
+        "FIREWALL_AGENT_SECRET": "key-ops-123"
+      }
+    }
+  }
+}

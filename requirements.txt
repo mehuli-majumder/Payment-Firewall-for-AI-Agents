@@ -1,0 +1,4 @@
+fastapi
+uvicorn[standard]
+pydantic
+mcp>=2.1

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payment Firewall: Agent Payment Governance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- ?v= is a cache buster: bump it whenever styles.css or app.js changes -->
+<link rel="stylesheet" href="/static/styles.css?v=24">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div>
+    <div class="sidebar-top">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Collapse sidebar"
+              aria-controls="sidebar" aria-expanded="true" title="Collapse sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+      </button>
+    </div>
+    <div class="brand">
+      <div class="brand-mark">PF</div>
+      <div>
+        <div class="brand-name">Payment Firewall<span class="brand-ver">v2.4</span></div>
+        <div class="brand-sub">Autonomous Agent Governance</div>
+      </div>
+    </div>
+
+    <nav id="nav">
+      <button class="nav-item active" data-view="overview">
+        <span class="nav-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          <span>Overview</span>
+        </span>
+      </button>
+      <button class="nav-item" data-view="payments">
+        <span class="nav-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
+          <span>Payments</span>
+        </span>
+      </button>
+      <button class="nav-item" data-view="approvals">
+        <span class="nav-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <span>Approvals</span>
+        </span>
+        <span class="nav-badge" id="nav-approval-count" hidden>0</span>
+      </button>
+      <button class="nav-item" data-view="budget">
+        <span class="nav-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z"/><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/></svg>
+          <span>Budget &amp; Limits</span>
+        </span>
+      </button>
+      <button class="nav-item" data-view="audit">
+        <span class="nav-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          <span>Audit / Replay</span>
+        </span>
+      </button>
+      <button class="nav-item" data-view="rails">
+        <span class="nav-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v2"/><path d="M12 2v2"/><path d="M17 20v2"/><path d="M17 2v2"/><path d="M2 12h2"/><path d="M2 17h2"/><path d="M2 7h2"/><path d="M20 12h2"/><path d="M20 17h2"/><path d="M20 7h2"/><path d="M7 20v2"/><path d="M7 2v2"/><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
+          <span>Rail Status</span>
+        </span>
+      </button>
+    </nav>
+  </div>
+
+  <div class="sidebar-foot">
+    <div class="foot-row"><span><span class="live-dot"></span>Agent</span><b id="foot-agent"></b></div>
+    <div class="foot-row"><span>Status</span><b class="ok" id="foot-agent-status"></b></div>
+    <div class="foot-row"><span>Environment</span><b class="muted">TEST / DEMO</b></div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div>
+      <div class="topbar-head">
+        <h1>Payment Firewall</h1>
+        <div class="pill" id="failclosed" title="If the risk engine, a payment rail, or reconciliation fails, the firewall becomes more cautious: never less.">
+          <span class="dot dot-ok"></span> Fail-Closed Active
+        </div>
+      </div>
+      <p class="topbar-sub">Autonomous payment governance &amp; risk control</p>
+    </div>
+    <div class="topbar-right">
+      <div class="statuses">
+        <span class="stat-chip">Risk engine <b id="risk-engine-status"></b></span>
+        <span class="stat-chip">System <b class="ok" id="system-status">OPERATIONAL</b></span>
+        <span class="stat-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <b class="mono" id="clock">--:--:--</b>
+        </span>
+        <span class="stat-chip chip-violet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg>
+          Demo Mode
+        </span>
+        <button class="btn btn-ghost" id="theme-toggle" aria-label="Toggle dark mode" style="padding:8px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="theme-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="global-alert" hidden></div>
+
+  <!-- ══ OVERVIEW ══ -->
+  <section class="view" data-view="overview">
+
+    <div class="cards" id="money-cards"></div>
+
+    <div class="grid-2">
+      <div class="panel" id="panel-budget">
+        <div class="panel-head">
+          <h2>
+            <span class="head-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            Budget Protection
+          </h2>
+          <span class="tag" title="Reserved funds are held against the daily budget while a payment awaits approval or execution. This prevents concurrent requests from spending the same budget twice.">Reservation-aware budget</span>
+        </div>
+        <div id="budget-body"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>
+            <span class="head-icon" style="color:var(--info)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="3" x2="9" y1="12" y2="12"/><line x1="15" x2="21" y1="12" y2="12"/></svg></span>
+            Payment Control Flow
+          </h2>
+          <span class="tag muted-tag">Live state machine</span>
+        </div>
+        <div id="pipeline-body"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-approvals-overview">
+      <div class="panel-head">
+        <h2>Human Approval Queue</h2>
+        <span class="tag warn-tag">Human approval required</span>
+      </div>
+      <div id="approvals-body"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head"><h2>Concurrent Payment Protection</h2></div>
+        <div id="race-body"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Payment Reconciliation</h2>
+        </div>
+        <div id="reconcile-body"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head"><h2>Recent Payments</h2></div>
+        <div id="payments-overview-body"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Protection Events</h2></div>
+        <div id="protection-body"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══ PAYMENTS ══ -->
+  <section class="view" data-view="payments" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Payment Activity</h2>
+        <span class="tag muted-tag">Click any row for the full decision path</span>
+      </div>
+      <div id="payments-body"></div>
+    </div>
+  </section>
+
+  <!-- ══ APPROVALS ══ -->
+  <section class="view" data-view="approvals" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Human Approval Queue</h2>
+        <span class="tag warn-tag">AI can escalate, never override hard rules</span>
+      </div>
+      <div id="approvals-full-body"></div>
+    </div>
+  </section>
+
+  <!-- ══ BUDGET ══ -->
+  <section class="view" data-view="budget" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Budget &amp; Limits</h2>
+        <span class="tag">Reservation-aware budget</span>
+      </div>
+      <div id="budget-full-body"></div>
+    </div>
+  </section>
+
+  <!-- ══ AUDIT ══ -->
+  <section class="view" data-view="audit" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Audit Integrity</h2>
+        <span class="tag">Tamper-evident audit chain</span>
+      </div>
+      <div id="integrity-body"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Audit Trail</h2>
+        <button class="btn btn-ghost btn-sm" id="btn-show-audit">Show Audit Trail</button>
+      </div>
+      <div id="audit-body" hidden></div>
+    </div>
+  </section>
+
+  <!-- ══ RAILS ══ -->
+  <section class="view" data-view="rails" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Payment Rail Status</h2>
+      </div>
+      <div id="rails-body"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- demo dock -->
+<div class="dock" id="dock">
+  <button class="dock-toggle" id="dock-toggle" aria-controls="dock-body" aria-expanded="false">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg>
+    <span id="dock-toggle-label">Demo Mode</span>
+  </button>
+  <div class="dock-body" id="dock-body" hidden>
+    <div class="dock-head">
+      <b>Demo Scenarios</b>
+      <button class="btn btn-ghost btn-sm" id="btn-reset">Reset</button>
+    </div>
+    <div class="dock-grid" id="scenario-list"></div>
+    <div class="dock-log" id="dock-log">Ready.</div>
+  </div>
+</div>
+
+<!-- payment detail drawer -->
+<div class="drawer-scrim" id="drawer-scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawer-head">
+    <div>
+      <h2 id="drawer-title">Payment</h2>
+      <p class="drawer-sub mono" id="drawer-id"></p>
+    </div>
+    <button class="btn btn-ghost" id="drawer-close">Close</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</aside>
+
+<!-- approve/deny reason modal -->
+<div class="modal-scrim" id="modal-scrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h2 id="modal-title">Approve Payment</h2>
+    <p class="modal-sub" id="modal-sub"></p>
+    <label class="label" for="modal-reason">Reason <span class="req">required</span></label>
+    <textarea id="modal-reason" rows="3" placeholder="e.g. Verified new payout account with vendor by phone"></textarea>
+    <p class="modal-note">Recorded in the tamper-evident audit trail against your name.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="/static/app.js?v=24"></script>
+</body>
+</html>
